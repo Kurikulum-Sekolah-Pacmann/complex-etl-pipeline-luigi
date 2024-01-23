@@ -124,19 +124,23 @@ class LoadData(luigi.Task):
         transform_data_db = pd.read_csv(self.input()[0].path)
         transform_data_scrape = pd.read_csv(self.input()[1].path)
 
+        transform_data_db.to_csv(self.output()[0].path)
+        transform_data_scrape.to_csv(self.output()[1].path)
+
         # load the data into database
         transform_data_db.to_sql(name = "db_mall_customers",
                                  con = engine,
-                                 if_exists = "append",
+                                 if_exists = "replace", # replace will drop your table and generate new based on input data
                                  index = False)
         
         transform_data_scrape.to_sql(name = "scrape_table",
                                      con = engine,
-                                     if_exists = "append",
+                                     if_exists = "replace", # replace will drop your table and generate new based on input data
                                      index = False)
         
     def output(self):
-        pass
+        return [luigi.LocalTarget("data/load/db_load_data.csv"),
+                luigi.LocalTarget("data/load/scrape_load_data.csv")]
 
 
 if __name__ == "__main__":
